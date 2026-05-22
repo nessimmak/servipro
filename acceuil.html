@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ServiPro – Gestion des Services</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0a0d14;
+            --surface: #111520;
+            --surface2: #161c2d;
+            --accent: #4f8ef7;
+            --accent2: #a78bfa;
+            --accent3: #34d399;
+            --text: #e8eaf2;
+            --text-muted: #8892a4;
+            --border: rgba(255, 255, 255, 0.07);
+            --glow: rgba(79, 142, 247, 0.15);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ── NOISE OVERLAY ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+            opacity: .5;
+        }
+
+        /* ── NAVBAR ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 5%;
+            background: rgba(10, 13, 20, 0.75);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.4rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent3);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2.5rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: .9rem;
+            font-weight: 500;
+            letter-spacing: .3px;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: .8rem;
+            align-items: center;
+        }
+
+        .btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: .88rem;
+            font-weight: 500;
+            padding: .55rem 1.3rem;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all .25s;
+            text-decoration: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            color: var(--text);
+            border-color: rgba(255, 255, 255, .18);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 24px rgba(79, 142, 247, .35);
+        }
+
+        .btn-primary:hover {
+            background: #6ba0f9;
+            box-shadow: 0 0 32px rgba(79, 142, 247, .55);
+            transform: translateY(-1px);
+        }
+
+        /* ── HERO ── */
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8rem 5% 6rem;
+            overflow: hidden;
+        }
+
+        /* Gradient orbs */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(90px);
+            opacity: .35;
+            pointer-events: none;
+        }
+
+        .orb-1 {
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, #4f8ef7 0%, transparent 70%);
+            top: -150px;
+            left: -100px;
+            animation: float1 12s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #a78bfa 0%, transparent 70%);
+            bottom: -100px;
+            right: -80px;
+            animation: float2 15s ease-in-out infinite;
+        }
+
+        .orb-3 {
+            width: 350px;
+            height: 350px;
+            background: radial-gradient(circle, #34d399 0%, transparent 70%);
+            top: 40%;
+            left: 60%;
+            opacity: .15;
+            animation: float1 18s ease-in-out infinite reverse;
+        }
+
+        /* Grid lines bg */
+        .hero-grid {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 60px 60px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 50%, black 30%, transparent 100%);
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+            background: rgba(79, 142, 247, .1);
+            border: 1px solid rgba(79, 142, 247, .25);
+            color: var(--accent);
+            font-size: .78rem;
+            font-weight: 500;
+            padding: .35rem 1rem;
+            border-radius: 100px;
+            margin-bottom: 2rem;
+            letter-spacing: .5px;
+            text-transform: uppercase;
+            animation: fadeUp .6s ease both;
+        }
+
+        .badge-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--accent3);
+            border-radius: 50%;
+            animation: pulse-dot 1.5s ease-in-out infinite;
+        }
+
+        h1 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2.8rem, 6vw, 5.5rem);
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -2px;
+            max-width: 820px;
+            animation: fadeUp .7s .1s ease both;
+        }
+
+        h1 .highlight {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-sub {
+            margin-top: 1.5rem;
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 540px;
+            line-height: 1.7;
+            font-weight: 300;
+            animation: fadeUp .7s .2s ease both;
+        }
+
+        .hero-cta {
+            margin-top: 2.5rem;
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            animation: fadeUp .7s .3s ease both;
+        }
+
+        .btn-large {
+            padding: .85rem 2rem;
+            font-size: 1rem;
+            border-radius: 10px;
+        }
+
+        /* ── STATS STRIP ── */
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 5rem;
+            animation: fadeUp .7s .4s ease both;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-val {
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-val span {
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: .8rem;
+            color: var(--text-muted);
+            margin-top: .2rem;
+        }
+
+        /* ── DASHBOARD PREVIEW ── */
+        .preview-wrap {
+            position: relative;
+            margin-top: 6rem;
+            animation: fadeUp .8s .5s ease both;
+        }
+
+        .preview-frame {
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, .04),
+                0 40px 80px rgba(0, 0, 0, .6),
+                0 0 80px rgba(79, 142, 247, .08);
+        }
+
+        .frame-bar {
+            background: var(--surface2);
+            padding: .75rem 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .frame-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .fd-red {
+            background: #f87171;
+        }
+
+        .fd-yellow {
+            background: #fbbf24;
+        }
+
+        .fd-green {
+            background: #34d399;
+        }
+
+        .frame-url {
+            flex: 1;
+            background: var(--bg);
+            border-radius: 6px;
+            padding: .3rem 1rem;
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin: 0 1rem;
+        }
+
+        /* Mini dashboard inside frame */
+        .mini-dash {
+            display: grid;
+            grid-template-columns: 200px 1fr;
+            min-height: 340px;
+        }
+
+        .mini-sidebar {
+            background: rgba(0, 0, 0, .2);
+            border-right: 1px solid var(--border);
+            padding: 1.2rem;
+        }
+
+        .mini-logo-sm {
+            font-family: 'Syne', sans-serif;
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+            padding-bottom: .8rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .mini-nav-item {
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .5rem .7rem;
+            border-radius: 7px;
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-bottom: .3rem;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .mini-nav-item:hover,
+        .mini-nav-item.active {
+            background: rgba(79, 142, 247, .12);
+            color: var(--accent);
+        }
+
+        .mini-nav-item .icon {
+            font-size: .9rem;
+        }
+
+        .mini-main {
+            padding: 1.2rem;
+        }
+
+        .mini-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: .8rem;
+            margin-bottom: 1rem;
+        }
+
+        .mini-card {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .9rem;
+        }
+
+        .mini-card-label {
+            font-size: .68rem;
+            color: var(--text-muted);
+            margin-bottom: .3rem;
+        }
+
+        .mini-card-val {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .mini-card-val.blue {
+            color: var(--accent);
+        }
+
+        .mini-card-val.green {
+            color: var(--accent3);
+        }
+
+        .mini-card-val.purple {
+            color: var(--accent2);
+        }
+
+        .mini-chart {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .9rem;
+            height: 130px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mini-chart-label {
+            font-size: .68rem;
+            color: var(--text-muted);
+            margin-bottom: .5rem;
+        }
+
+        .chart-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 5px;
+            height: 85px;
+        }
+
+        .bar {
+            flex: 1;
+            border-radius: 4px 4px 0 0;
+            opacity: .8;
+            animation: growBar .8s ease both;
+        }
+
+        /* ── FEATURES ── */
+        section {
+            position: relative;
+            z-index: 1;
+        }
+
+        .features {
+            padding: 7rem 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            font-size: .78rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--accent);
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(1.8rem, 3.5vw, 2.8rem);
+            font-weight: 700;
+            line-height: 1.15;
+            letter-spacing: -1px;
+            max-width: 500px;
+            margin-bottom: 4rem;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all .3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            opacity: 0;
+            transition: opacity .3s;
+        }
+
+        .feature-card:hover {
+            border-color: rgba(79, 142, 247, .25);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, .3), 0 0 30px var(--glow);
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            margin-bottom: 1.3rem;
+        }
+
+        .fi-blue {
+            background: rgba(79, 142, 247, .15);
+        }
+
+        .fi-green {
+            background: rgba(52, 211, 153, .15);
+        }
+
+        .fi-purple {
+            background: rgba(167, 139, 250, .15);
+        }
+
+        .fi-orange {
+            background: rgba(251, 146, 60, .15);
+        }
+
+        .fi-cyan {
+            background: rgba(34, 211, 238, .15);
+        }
+
+        .fi-pink {
+            background: rgba(244, 114, 182, .15);
+        }
+
+        .feature-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: .6rem;
+        }
+
+        .feature-desc {
+            font-size: .88rem;
+            color: var(--text-muted);
+            line-height: 1.65;
+        }
+
+        /* ── HOW IT WORKS ── */
+        .how {
+            padding: 7rem 5%;
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .how-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5rem;
+            align-items: center;
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 1.8rem;
+        }
+
+        .step {
+            display: flex;
+            gap: 1.3rem;
+            align-items: flex-start;
+        }
+
+        .step-num {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(79, 142, 247, .12);
+            border: 1px solid rgba(79, 142, 247, .25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: .85rem;
+            color: var(--accent);
+            flex-shrink: 0;
+        }
+
+        .step-title {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: .4rem;
+        }
+
+        .step-desc {
+            font-size: .87rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* CRM mini preview */
+        .crm-preview {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, .4);
+        }
+
+        .crm-header {
+            font-family: 'Syne', sans-serif;
+            font-size: .85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 1.2rem;
+            padding-bottom: .8rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .crm-badge {
+            background: rgba(52, 211, 153, .15);
+            color: var(--accent3);
+            font-size: .7rem;
+            padding: .2rem .6rem;
+            border-radius: 100px;
+        }
+
+        .crm-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .75rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, .04);
+        }
+
+        .crm-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .75rem;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .crm-info {
+            flex: 1;
+        }
+
+        .crm-name {
+            font-size: .82rem;
+            font-weight: 500;
+        }
+
+        .crm-service {
+            font-size: .72rem;
+            color: var(--text-muted);
+        }
+
+        .crm-status {
+            font-size: .7rem;
+            padding: .2rem .7rem;
+            border-radius: 100px;
+            font-weight: 500;
+        }
+
+        .s-active {
+            background: rgba(52, 211, 153, .15);
+            color: var(--accent3);
+        }
+
+        .s-pending {
+            background: rgba(251, 191, 36, .12);
+            color: #fbbf24;
+        }
+
+        .s-done {
+            background: rgba(79, 142, 247, .12);
+            color: var(--accent);
+        }
+
+        /* ── CTA ── */
+        .cta-section {
+            padding: 8rem 5%;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-section .orb-cta {
+            position: absolute;
+            width: 700px;
+            height: 400px;
+            background: radial-gradient(ellipse, rgba(79, 142, 247, .12) 0%, transparent 70%);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+
+        .cta-section h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
+            line-height: 1.1;
+        }
+
+        .cta-section p {
+            color: var(--text-muted);
+            max-width: 420px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2.5rem 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: .82rem;
+            color: var(--text-muted);
+        }
+
+        footer .logo {
+            font-size: 1rem;
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float1 {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(40px, 30px);
+            }
+        }
+
+        @keyframes float2 {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(-30px, -20px);
+            }
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .5;
+                transform: scale(.7);
+            }
+        }
+
+        @keyframes growBar {
+            from {
+                transform: scaleY(0);
+                transform-origin: bottom;
+            }
+
+            to {
+                transform: scaleY(1);
+                transform-origin: bottom;
+            }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .how-inner {
+                grid-template-columns: 1fr;
+                gap: 3rem;
+            }
+
+            .stats {
+                gap: 1.5rem;
+                flex-wrap: wrap;
+            }
+
+            .mini-dash {
+                grid-template-columns: 1fr;
+            }
+
+            .mini-sidebar {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body data-page="index">
+
+    <!-- NAV -->
+    <nav>
+        <div class="logo">
+            <div class="logo-dot"></div>
+            Servi<span>Pro</span>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#features">Fonctionnalités</a></li>
+            <li><a href="#how">Comment ça marche</a></li>
+            <li><a href="reservation.html">Réservation</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+        <div class="nav-actions">
+            <a href="login.html" class="btn btn-ghost">Se connecter</a>
+            <a href="register.html" class="btn btn-primary">S'inscrire</a>
+        </div>
+        
+    </nav>
+
+    <!-- HERO -->
+    <section class="hero">
+        <div class="hero-grid"></div>
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+        <div class="orb orb-3"></div>
+
+        <div class="badge">
+            <div class="badge-dot"></div>
+            Plateforme de gestion intelligente
+        </div>
+
+        <h1>Gérez vos <span class="highlight">services</span> avec précision</h1>
+
+        <p class="hero-sub">
+            ServiPro centralise la gestion de vos services, clients et réservations
+            dans un dashboard CRM puissant et intuitif.
+        </p>
+
+        <div class="hero-cta">
+            <a href="register.html" class="btn btn-primary btn-large">Commencer gratuitement →</a>
+            <a href="#features" class="btn btn-ghost btn-large">Découvrir les fonctionnalités</a>
+        </div>
+
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-val">500<span>+</span></div>
+                <div class="stat-label">Services gérés</div>
+            </div>
+            <div class="stat">
+                <div class="stat-val">98<span>%</span></div>
+                <div class="stat-label">Satisfaction client</div>
+            </div>
+            <div class="stat">
+                <div class="stat-val">24<span>/7</span></div>
+                <div class="stat-label">Disponibilité</div>
+            </div>
+            <div class="stat">
+                <div class="stat-val">3x</div>
+                <div class="stat-label">Gain de productivité</div>
+            </div>
+        </div>
+
+        <!-- Dashboard preview -->
+        <div class="preview-wrap" style="width:100%; padding: 0 2rem;">
+            <div class="preview-frame">
+                <div class="frame-bar">
+                    <div class="frame-dot fd-red"></div>
+                    <div class="frame-dot fd-yellow"></div>
+                    <div class="frame-dot fd-green"></div>
+                    <div class="frame-url">🔒 servipro.app/dashboard</div>
+                </div>
+                <div class="mini-dash">
+                    <div class="mini-sidebar">
+                        <div class="mini-logo-sm">⬡ ServiPro</div>
+                        <div class="mini-nav-item active"><span class="icon">▦</span> Dashboard</div>
+                        <div class="mini-nav-item"><span class="icon">◈</span> Services</div>
+                        <div class="mini-nav-item"><span class="icon">◉</span> Clients</div>
+                        <div class="mini-nav-item"><span class="icon">⊞</span> Réservations</div>
+                        <div class="mini-nav-item"><span class="icon">◎</span> Statistiques</div>
+                        <div class="mini-nav-item"><span class="icon">⚙</span> Paramètres</div>
+                    </div>
+                    <div class="mini-main">
+                        <div class="mini-cards">
+                            <div class="mini-card">
+                                <div class="mini-card-label">Services actifs</div>
+                                <div class="mini-card-val blue">48</div>
+                            </div>
+                            <div class="mini-card">
+                                <div class="mini-card-label">Réservations</div>
+                                <div class="mini-card-val green">124</div>
+                            </div>
+                            <div class="mini-card">
+                                <div class="mini-card-label">Clients</div>
+                                <div class="mini-card-val purple">312</div>
+                            </div>
+                        </div>
+                        <div class="mini-chart">
+                            <div class="mini-chart-label">Activité mensuelle</div>
+                            <div class="chart-bars">
+                                <div class="bar" style="height:40%; background:var(--accent); animation-delay:.1s">
+                                </div>
+                                <div class="bar" style="height:65%; background:var(--accent); animation-delay:.15s">
+                                </div>
+                                <div class="bar" style="height:50%; background:var(--accent); animation-delay:.2s">
+                                </div>
+                                <div class="bar" style="height:80%; background:var(--accent2); animation-delay:.25s">
+                                </div>
+                                <div class="bar" style="height:55%; background:var(--accent); animation-delay:.3s">
+                                </div>
+                                <div class="bar" style="height:90%; background:var(--accent3); animation-delay:.35s">
+                                </div>
+                                <div class="bar" style="height:70%; background:var(--accent); animation-delay:.4s">
+                                </div>
+                                <div class="bar" style="height:85%; background:var(--accent2); animation-delay:.45s">
+                                </div>
+                                <div class="bar" style="height:60%; background:var(--accent); animation-delay:.5s">
+                                </div>
+                                <div class="bar" style="height:95%; background:var(--accent3); animation-delay:.55s">
+                                </div>
+                                <div class="bar" style="height:75%; background:var(--accent); animation-delay:.6s">
+                                </div>
+                                <div class="bar" style="height:88%; background:var(--accent2); animation-delay:.65s">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section class="features" id="features">
+        <div class="section-label">Fonctionnalités</div>
+        <h2 class="section-title">Tout ce dont vous avez besoin</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon fi-blue">🧩</div>
+                <div class="feature-title">Gestion des Services</div>
+                <div class="feature-desc">Créez, modifiez et supprimez vos services avec upload d'images. Organisez vos
+                    offres facilement depuis un panneau centralisé.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-green">📅</div>
+                <div class="feature-title">Réservations & Commandes</div>
+                <div class="feature-desc">Suivez toutes vos réservations en temps réel. Gérez les statuts, les dates et
+                    les clients associés depuis un seul endroit.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-purple">👥</div>
+                <div class="feature-title">CRM Clients</div>
+                <div class="feature-desc">Un dashboard complet pour gérer votre base clients, consulter l'historique des
+                    interactions et suivre leur activité.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-orange">📊</div>
+                <div class="feature-title">Statistiques & Rapports</div>
+                <div class="feature-desc">Visualisez vos performances avec des graphiques clairs. Prenez des décisions
+                    éclairées grâce à des données en temps réel.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-cyan">🔐</div>
+                <div class="feature-title">Authentification Sécurisée</div>
+                <div class="feature-desc">Connexion et inscription sécurisées. Chaque utilisateur accède uniquement à
+                    son espace personnel protégé.</div>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon fi-pink">⚡</div>
+                <div class="feature-title">Interface Réactive</div>
+                <div class="feature-desc">Conçue avec HTML, CSS et JavaScript pour une expérience fluide sur tous les
+                    écrans, du mobile au desktop.</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="how" id="how">
+        <div class="how-inner">
+            <div>
+                <div class="section-label">Processus</div>
+                <h2 class="section-title">Simple, rapide, efficace</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-num">01</div>
+                        <div>
+                            <div class="step-title">Créez votre compte</div>
+                            <div class="step-desc">Inscrivez-vous en quelques secondes et accédez immédiatement à votre
+                                espace personnel.</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">02</div>
+                        <div>
+                            <div class="step-title">Ajoutez vos services</div>
+                            <div class="step-desc">Publiez vos offres avec description, photo et tarif. La gestion est
+                                entièrement visuelle et intuitive.</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">03</div>
+                        <div>
+                            <div class="step-title">Gérez les réservations</div>
+                            <div class="step-desc">Recevez et traitez les demandes de vos clients directement depuis le
+                                dashboard CRM.</div>
+                        </div>
+                    </div>
+                    <div class="step">
+                        <div class="step-num">04</div>
+                        <div>
+                            <div class="step-title">Analysez les performances</div>
+                            <div class="step-desc">Consultez les statistiques pour optimiser vos services et améliorer
+                                votre offre.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CRM Preview -->
+            <div class="crm-preview">
+                <div class="crm-header">
+                    <span>Clients récents</span>
+                    <span class="crm-badge">Live</span>
+                </div>
+                <div class="crm-row">
+                    <div class="crm-avatar" style="background:rgba(79,142,247,.2); color:var(--accent)">AM</div>
+                    <div class="crm-info">
+                        <div class="crm-name">Ahmed Mansouri</div>
+                        <div class="crm-service">Maintenance système</div>
+                    </div>
+                    <div class="crm-status s-active">Actif</div>
+                </div>
+                <div class="crm-row">
+                    <div class="crm-avatar" style="background:rgba(167,139,250,.2); color:var(--accent2)">SB</div>
+                    <div class="crm-info">
+                        <div class="crm-name">Sara Benali</div>
+                        <div class="crm-service">Consultation web</div>
+                    </div>
+                    <div class="crm-status s-pending">En attente</div>
+                </div>
+                <div class="crm-row">
+                    <div class="crm-avatar" style="background:rgba(52,211,153,.2); color:var(--accent3)">KT</div>
+                    <div class="crm-info">
+                        <div class="crm-name">Karim Trabelsi</div>
+                        <div class="crm-service">Développement app</div>
+                    </div>
+                    <div class="crm-status s-done">Terminé</div>
+                </div>
+                <div class="crm-row">
+                    <div class="crm-avatar" style="background:rgba(251,146,60,.2); color:#fb923c">LH</div>
+                    <div class="crm-info">
+                        <div class="crm-name">Leila Hamdi</div>
+                        <div class="crm-service">Support technique</div>
+                    </div>
+                    <div class="crm-status s-active">Actif</div>
+                </div>
+                <div class="crm-row">
+                    <div class="crm-avatar" style="background:rgba(244,114,182,.2); color:#f472b6">MJ</div>
+                    <div class="crm-info">
+                        <div class="crm-name">Mohamed Jebali</div>
+                        <div class="crm-service">Design graphique</div>
+                    </div>
+                    <div class="crm-status s-pending">En attente</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta-section" id="cta">
+        <div class="orb-cta"></div>
+        <h2>Prêt à optimiser votre gestion ?</h2>
+        <p>Rejoignez ServiPro et transformez la façon dont vous gérez vos services au quotidien.</p>
+        <a href="register.html" class="btn btn-primary btn-large">Créer mon compte gratuitement →</a>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="logo">
+            <div class="logo-dot"></div>
+            Servi<span>Pro</span>
+        </div>
+        <span>© 2026 ServiPro – Gestion des Services</span>
+        <span>Projet JS / PHP</span>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

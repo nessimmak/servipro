@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ServiPro – Mon Profil</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0a0d14;
+            --surface: #111520;
+            --surface2: #161c2d;
+            --accent: #4f8ef7;
+            --accent2: #a78bfa;
+            --accent3: #34d399;
+            --text: #e8eaf2;
+            --text-muted: #8892a4;
+            --border: rgba(255, 255, 255, 0.07);
+            --error: #f87171;
+            --success: #34d399;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        /* ══════════════════════════════
+           SIDEBAR
+        ══════════════════════════════ */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 2rem 1.2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            letter-spacing: -.5px;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            text-decoration: none;
+            color: var(--text);
+            margin-bottom: 2.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent3);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .nav-section-label {
+            font-size: .68rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: .6rem;
+            padding-left: .5rem;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: .7rem;
+            padding: .65rem .8rem;
+            border-radius: 9px;
+            font-size: .88rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: .2rem;
+            transition: all .2s;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, .04);
+            color: var(--text);
+        }
+
+        .nav-item.active {
+            background: rgba(79, 142, 247, .12);
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .nav-icon {
+            font-size: 1rem;
+            width: 20px;
+            text-align: center;
+        }
+
+        .sidebar-spacer {
+            flex: 1;
+        }
+
+        /* User mini-card en bas de sidebar */
+        .sidebar-user {
+            border-top: 1px solid var(--border);
+            padding-top: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: .8rem;
+        }
+
+        .sidebar-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-size: .85rem;
+            font-weight: 700;
+            color: #fff;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+
+        .sidebar-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .sidebar-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .sidebar-user-name {
+            font-size: .85rem;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-user-role {
+            font-size: .72rem;
+            color: var(--text-muted);
+        }
+
+        .btn-logout {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 1rem;
+            padding: .3rem;
+            transition: color .2s;
+            flex-shrink: 0;
+        }
+
+        .btn-logout:hover {
+            color: var(--error);
+        }
+
+        /* ══════════════════════════════
+           MAIN CONTENT
+        ══════════════════════════════ */
+        .main {
+            margin-left: 240px;
+            flex: 1;
+            padding: 2.5rem;
+            max-width: 900px;
+        }
+
+        /* Topbar */
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2.5rem;
+        }
+
+        .page-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -.5px;
+        }
+
+        .breadcrumb {
+            font-size: .82rem;
+            color: var(--text-muted);
+            margin-top: .2rem;
+        }
+
+        .breadcrumb a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        /* ── Alertes ── */
+        .alert {
+            padding: .85rem 1.1rem;
+            border-radius: 10px;
+            font-size: .85rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: .6rem;
+            animation: fadeUp .3s ease both;
+        }
+
+        .alert.show {
+            display: flex;
+        }
+
+        .alert-error {
+            background: rgba(248, 113, 113, .1);
+            border: 1px solid rgba(248, 113, 113, .25);
+            color: var(--error);
+        }
+
+        .alert-success {
+            background: rgba(52, 211, 153, .1);
+            border: 1px solid rgba(52, 211, 153, .25);
+            color: var(--success);
+        }
+
+        /* ══════════════════════════════
+           CARTE AVATAR
+        ══════════════════════════════ */
+        .avatar-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+            animation: fadeUp .5s ease both;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .avatar-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+        }
+
+        .avatar-big {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Syne', sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+            border: 3px solid rgba(79, 142, 247, .3);
+        }
+
+        .avatar-big img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .avatar-info {
+            flex: 1;
+        }
+
+        .avatar-name {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -.3px;
+            margin-bottom: .3rem;
+        }
+
+        .avatar-email {
+            color: var(--text-muted);
+            font-size: .88rem;
+            margin-bottom: .8rem;
+        }
+
+        .avatar-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: .4rem;
+            background: rgba(52, 211, 153, .1);
+            border: 1px solid rgba(52, 211, 153, .2);
+            color: var(--accent3);
+            font-size: .75rem;
+            font-weight: 500;
+            padding: .3rem .8rem;
+            border-radius: 100px;
+        }
+
+        /* Bouton changer photo */
+        .btn-change-avatar {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 10px;
+            padding: .6rem 1.2rem;
+            font-family: 'DM Sans', sans-serif;
+            font-size: .85rem;
+            cursor: pointer;
+            transition: all .2s;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-change-avatar:hover {
+            border-color: rgba(79, 142, 247, .3);
+            color: var(--accent);
+        }
+
+        #avatarInput {
+            display: none;
+        }
+
+        /* ══════════════════════════════
+           GRILLE DE SECTIONS
+        ══════════════════════════════ */
+        .sections-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.8rem;
+            animation: fadeUp .5s ease both;
+        }
+
+        .section-card.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .section-card:nth-child(1) {
+            animation-delay: .05s;
+        }
+
+        .section-card:nth-child(2) {
+            animation-delay: .1s;
+        }
+
+        .section-card:nth-child(3) {
+            animation-delay: .15s;
+        }
+
+        .section-card:nth-child(4) {
+            animation-delay: .2s;
+        }
+
+        .section-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+        }
+
+        .section-title .s-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            background: rgba(79, 142, 247, .1);
+            border: 1px solid rgba(79, 142, 247, .15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: .85rem;
+        }
+
+        /* ── Champs ── */
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: .8rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: .45rem;
+            letter-spacing: .3px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: .9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: .9rem;
+            pointer-events: none;
+            opacity: .45;
+            transition: opacity .2s;
+        }
+
+        .input-wrap:focus-within .input-icon {
+            opacity: 1;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .8rem 1rem .8rem 2.6rem;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .9rem;
+            outline: none;
+            transition: border-color .25s, box-shadow .25s;
+        }
+
+        textarea {
+            padding: .8rem 1rem;
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: rgba(79, 142, 247, .5);
+            box-shadow: 0 0 0 3px rgba(79, 142, 247, .1);
+        }
+
+        input.error {
+            border-color: var(--error);
+            box-shadow: 0 0 0 3px rgba(248, 113, 113, .1);
+        }
+
+        input.success-input {
+            border-color: var(--success);
+            box-shadow: 0 0 0 3px rgba(52, 211, 153, .1);
+        }
+
+        .toggle-pw {
+            position: absolute;
+            right: .9rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: .85rem;
+            padding: .2rem;
+            transition: color .2s;
+        }
+
+        .toggle-pw:hover {
+            color: var(--text);
+        }
+
+        .field-error {
+            font-size: .73rem;
+            color: var(--error);
+            margin-top: .35rem;
+            display: none;
+            align-items: center;
+            gap: .3rem;
+        }
+
+        .field-error.visible {
+            display: flex;
+        }
+
+        /* ── Boutons ── */
+        .btn-primary {
+            padding: .8rem 1.8rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Syne', sans-serif;
+            font-size: .9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s;
+            box-shadow: 0 0 20px rgba(79, 142, 247, .3);
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-primary:hover {
+            background: #6ba0f9;
+            transform: translateY(-1px);
+            box-shadow: 0 0 28px rgba(79, 142, 247, .5);
+        }
+
+        .btn-primary:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-danger {
+            padding: .8rem 1.8rem;
+            background: rgba(248, 113, 113, .1);
+            color: var(--error);
+            border: 1px solid rgba(248, 113, 113, .25);
+            border-radius: 10px;
+            font-family: 'Syne', sans-serif;
+            font-size: .9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all .25s;
+            display: inline-flex;
+            align-items: center;
+            gap: .5rem;
+        }
+
+        .btn-danger:hover {
+            background: rgba(248, 113, 113, .18);
+            border-color: rgba(248, 113, 113, .4);
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: none;
+        }
+
+        .btn-primary.loading .spinner {
+            display: block;
+        }
+
+        .btn-primary.loading .btn-text {
+            display: none;
+        }
+
+        /* ── Stats rapides ── */
+        .stats-mini {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-mini-card {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .stat-mini-val {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: .2rem;
+        }
+
+        .stat-mini-val.blue {
+            color: var(--accent);
+        }
+
+        .stat-mini-val.green {
+            color: var(--accent3);
+        }
+
+        .stat-mini-val.purple {
+            color: var(--accent2);
+        }
+
+        .stat-mini-label {
+            font-size: .75rem;
+            color: var(--text-muted);
+        }
+
+        /* ── Historique réservations ── */
+        .reservation-list {
+            display: flex;
+            flex-direction: column;
+            gap: .8rem;
+        }
+
+        .res-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: .9rem 1rem;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            transition: border-color .2s;
+        }
+
+        .res-item:hover {
+            border-color: rgba(79, 142, 247, .25);
+        }
+
+        .res-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .res-dot.confirme {
+            background: var(--accent3);
+        }
+
+        .res-dot.en_attente {
+            background: #fbbf24;
+        }
+
+        .res-dot.termine {
+            background: var(--accent);
+        }
+
+        .res-dot.annule {
+            background: var(--error);
+        }
+
+        .res-info {
+            flex: 1;
+        }
+
+        .res-service {
+            font-size: .88rem;
+            font-weight: 500;
+        }
+
+        .res-date {
+            font-size: .75rem;
+            color: var(--text-muted);
+            margin-top: .15rem;
+        }
+
+        .res-badge {
+            font-size: .72rem;
+            padding: .25rem .7rem;
+            border-radius: 100px;
+            font-weight: 500;
+        }
+
+        .res-badge.confirme {
+            background: rgba(52, 211, 153, .12);
+            color: var(--accent3);
+        }
+
+        .res-badge.en_attente {
+            background: rgba(251, 191, 36, .1);
+            color: #fbbf24;
+        }
+
+        .res-badge.termine {
+            background: rgba(79, 142, 247, .12);
+            color: var(--accent);
+        }
+
+        .res-badge.annule {
+            background: rgba(248, 113, 113, .1);
+            color: var(--error);
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: .88rem;
+            padding: 2rem 0;
+        }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .5;
+                transform: scale(.7);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20% {
+                transform: translateX(-8px);
+            }
+
+            40% {
+                transform: translateX(8px);
+            }
+
+            60% {
+                transform: translateX(-5px);
+            }
+
+            80% {
+                transform: translateX(5px);
+            }
+        }
+
+        .shake {
+            animation: shake .4s ease;
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 900px) {
+            .sidebar {
+                display: none;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 1.5rem;
+            }
+
+            .sections-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-mini {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .avatar-card {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body data-page="profil">
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar">
+        <a href="index.html" class="logo">
+            <div class="logo-dot"></div>
+            Servi<span>Pro</span>
+        </a>
+
+        <div class="nav-section-label">Navigation</div>
+
+        <a href="dashboard.html" class="nav-item">
+            <span class="nav-icon">▦</span> Dashboard
+        </a>
+        <a href="reservation.html" class="nav-item">
+            <span class="nav-icon">📅</span> Réservations
+        </a>
+        <a href="profil.html" class="nav-item active">
+            <span class="nav-icon">👤</span> Mon Profil
+        </a>
+
+        <div class="sidebar-spacer"></div>
+
+        <!-- Utilisateur connecté -->
+        <div class="sidebar-user">
+            <div class="sidebar-avatar" id="sidebarAvatar">?</div>
+            <div class="sidebar-user-info">
+                <div class="sidebar-user-name" id="sidebarName">Chargement...</div>
+                <div class="sidebar-user-role">Utilisateur</div>
+            </div>
+            <button class="btn-logout" id="logoutBtn" title="Se déconnecter">🚪</button>
+        </div>
+    </aside>
+
+    <!-- ══ MAIN CONTENT ══ -->
+    <main class="main">
+
+        <!-- Topbar -->
+        <div class="topbar">
+            <div>
+                <div class="page-title">Mon Profil</div>
+                <div class="breadcrumb">
+                    <a href="index.html">Accueil</a> › Mon Profil
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertes -->
+        <div class="alert alert-error" id="alertError">
+            <span>⚠️</span>
+            <span id="alertMsg">Une erreur est survenue.</span>
+        </div>
+        <div class="alert alert-success" id="alertSuccess">
+            <span>✅</span>
+            <span id="alertSuccessMsg">Profil mis à jour avec succès !</span>
+        </div>
+
+        <!-- ── Carte Avatar ── -->
+        <div class="avatar-card">
+            <div class="avatar-big" id="avatarBig">?</div>
+            <div class="avatar-info">
+                <div class="avatar-name" id="profilNomComplet">Chargement...</div>
+                <div class="avatar-email" id="profilEmail">—</div>
+                <div class="avatar-badge">✓ &nbsp; Compte actif</div>
+            </div>
+            <div>
+                <input type="file" id="avatarInput" accept="image/*" />
+                <button class="btn-change-avatar" id="changeAvatarBtn">
+                    📷 Changer la photo
+                </button>
+            </div>
+        </div>
+
+        <!-- ── Grille de sections ── -->
+        <div class="sections-grid">
+
+            <!-- Informations personnelles -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="s-icon">👤</div>
+                    Informations personnelles
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label for="prenom">Prénom</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">✏️</span>
+                            <input type="text" id="prenom" placeholder="Votre prénom" />
+                        </div>
+                        <div class="field-error" id="prenomError">⚠ Minimum 2 caractères</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="nom">Nom</label>
+                        <div class="input-wrap">
+                            <span class="input-icon">✏️</span>
+                            <input type="text" id="nom" placeholder="Votre nom" />
+                        </div>
+                        <div class="field-error" id="nomError">⚠ Minimum 2 caractères</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Adresse email</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">✉️</span>
+                        <input type="email" id="email" placeholder="vous@exemple.com" />
+                    </div>
+                    <div class="field-error" id="emailError">⚠ Email invalide</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="telephone">Téléphone</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">📞</span>
+                        <input type="tel" id="telephone" placeholder="+216 XX XXX XXX" />
+                    </div>
+                </div>
+
+                <button class="btn-primary" id="saveProfilBtn">
+                    <div class="spinner"></div>
+                    <span class="btn-text">💾 Sauvegarder</span>
+                </button>
+            </div>
+
+            <!-- Changer mot de passe -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="s-icon">🔒</div>
+                    Changer le mot de passe
+                </div>
+
+                <div class="form-group">
+                    <label for="oldPassword">Mot de passe actuel</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔑</span>
+                        <input type="password" id="oldPassword" placeholder="••••••••" />
+                        <button class="toggle-pw" id="toggleOld" type="button">👁</button>
+                    </div>
+                    <div class="field-error" id="oldPasswordError">⚠ Champ obligatoire</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="newPassword">Nouveau mot de passe</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔒</span>
+                        <input type="password" id="newPassword" placeholder="Minimum 6 caractères" />
+                        <button class="toggle-pw" id="toggleNew" type="button">👁</button>
+                    </div>
+                    <div class="field-error" id="newPasswordError">⚠ Minimum 6 caractères</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmer le nouveau mot de passe</label>
+                    <div class="input-wrap">
+                        <span class="input-icon">🔑</span>
+                        <input type="password" id="confirmPassword" placeholder="Répétez le mot de passe" />
+                    </div>
+                    <div class="field-error" id="confirmPasswordError">⚠ Les mots de passe ne correspondent pas</div>
+                </div>
+
+                <button class="btn-primary" id="changePasswordBtn">
+                    <div class="spinner"></div>
+                    <span class="btn-text">🔐 Modifier le mot de passe</span>
+                </button>
+            </div>
+
+            <!-- Statistiques rapides -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="s-icon">📊</div>
+                    Mes statistiques
+                </div>
+                <div class="stats-mini">
+                    <div class="stat-mini-card">
+                        <div class="stat-mini-val blue" id="statTotalRes">—</div>
+                        <div class="stat-mini-label">Réservations</div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <div class="stat-mini-val green" id="statConfirmes">—</div>
+                        <div class="stat-mini-label">Confirmées</div>
+                    </div>
+                    <div class="stat-mini-card">
+                        <div class="stat-mini-val purple" id="statTermines">—</div>
+                        <div class="stat-mini-label">Terminées</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dernières réservations -->
+            <div class="section-card">
+                <div class="section-title">
+                    <div class="s-icon">📅</div>
+                    Dernières réservations
+                </div>
+                <div class="reservation-list" id="dernieresReservations">
+                    <div class="empty-msg">Chargement...</div>
+                </div>
+            </div>
+
+            <!-- Danger zone -->
+            <div class="section-card full-width" style="border-color: rgba(248,113,113,.15);">
+                <div class="section-title" style="color: var(--error);">
+                    <div class="s-icon" style="background:rgba(248,113,113,.1); border-color:rgba(248,113,113,.2);">⚠️
+                    </div>
+                    Zone de danger
+                </div>
+                <p style="color:var(--text-muted); font-size:.88rem; margin-bottom:1.2rem; line-height:1.6;">
+                    La suppression de votre compte est irréversible. Toutes vos données seront définitivement effacées.
+                </p>
+                <button class="btn-danger" id="deleteAccountBtn">
+                    🗑️ Supprimer mon compte
+                </button>
+            </div>
+
+        </div>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+
+</html>

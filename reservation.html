@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ServiPro – Réservation</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #0a0d14;
+            --surface: #111520;
+            --surface2: #161c2d;
+            --accent: #4f8ef7;
+            --accent2: #a78bfa;
+            --accent3: #34d399;
+            --text: #e8eaf2;
+            --text-muted: #8892a4;
+            --border: rgba(255, 255, 255, 0.07);
+            --error: #f87171;
+            --success: #34d399;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        /* ── ORBS / BG ── */
+        .orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: .18;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .orb-1 {
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, #4f8ef7, transparent 70%);
+            top: -100px;
+            left: -100px;
+            animation: float1 12s ease-in-out infinite;
+        }
+
+        .orb-2 {
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, #a78bfa, transparent 70%);
+            bottom: -80px;
+            right: -80px;
+            animation: float2 15s ease-in-out infinite;
+        }
+
+        /* ── NAVBAR ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.1rem 5%;
+            background: rgba(10, 13, 20, 0.8);
+            backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--border);
+            transition: background .3s;
+        }
+
+        nav.scrolled {
+            background: rgba(10, 13, 20, 0.97);
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.3rem;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent3);
+            border-radius: 50%;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .nav-link {
+            font-size: .85rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color .2s;
+        }
+
+        .nav-link:hover {
+            color: var(--text);
+        }
+
+        .nav-link.active {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .btn {
+            font-family: 'DM Sans', sans-serif;
+            font-size: .85rem;
+            font-weight: 500;
+            padding: .5rem 1.2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            transition: all .25s;
+            text-decoration: none;
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+
+        .btn-ghost:hover {
+            color: var(--text);
+            border-color: rgba(255, 255, 255, .18);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: #fff;
+            box-shadow: 0 0 20px rgba(79, 142, 247, .3);
+        }
+
+        .btn-primary:hover {
+            background: #6ba0f9;
+            box-shadow: 0 0 30px rgba(79, 142, 247, .5);
+            transform: translateY(-1px);
+        }
+
+        /* ── LAYOUT PRINCIPAL ── */
+        .page-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr;
+            gap: 0;
+            min-height: 100vh;
+            padding-top: 70px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── PANEL GAUCHE : FORMULAIRE ── */
+        .form-panel {
+            padding: 3rem 4rem;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            position: relative;
+            overflow-y: auto;
+        }
+
+        .form-panel::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2), var(--accent3));
+        }
+
+        .page-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: .4rem;
+        }
+
+        .page-subtitle {
+            color: var(--text-muted);
+            font-size: .9rem;
+            margin-bottom: 2.5rem;
+        }
+
+        /* ── ALERT ── */
+        .alert {
+            padding: .9rem 1.1rem;
+            border-radius: 10px;
+            font-size: .85rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            align-items: center;
+            gap: .6rem;
+            animation: fadeUp .3s ease both;
+        }
+
+        .alert.show {
+            display: flex;
+        }
+
+        .alert-error {
+            background: rgba(248, 113, 113, .1);
+            border: 1px solid rgba(248, 113, 113, .25);
+            color: var(--error);
+        }
+
+        .alert-success {
+            background: rgba(52, 211, 153, .1);
+            border: 1px solid rgba(52, 211, 153, .25);
+            color: var(--success);
+        }
+
+        /* ── FORM ELEMENTS ── */
+        .form-group {
+            margin-bottom: 1.4rem;
+        }
+
+        label {
+            display: block;
+            font-size: .82rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            margin-bottom: .5rem;
+            letter-spacing: .3px;
+        }
+
+        label .required {
+            color: var(--accent);
+            margin-left: .2rem;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: .95rem;
+            pointer-events: none;
+            opacity: .5;
+            transition: opacity .2s;
+        }
+
+        .input-wrap:focus-within .input-icon {
+            opacity: 1;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: .85rem 1rem .85rem 2.8rem;
+            color: var(--text);
+            font-family: 'DM Sans', sans-serif;
+            font-size: .92rem;
+            outline: none;
+            transition: border-color .25s, box-shadow .25s;
+            appearance: none;
+        }
+
+        textarea {
+            padding: .85rem 1rem;
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: rgba(79, 142, 247, .5);
+            box-shadow: 0 0 0 3px rgba(79, 142, 247, .1);
+        }
+
+        /* Select arrow */
+        .select-wrap {
+            position: relative;
+        }
+
+        .select-wrap::after {
+            content: '▾';
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+            font-size: .8rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        /* ── SUBMIT BUTTON ── */
+        .btn-submit {
+            width: 100%;
+            padding: 1rem;
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Syne', sans-serif;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            letter-spacing: .3px;
+            transition: all .25s;
+            box-shadow: 0 0 24px rgba(79, 142, 247, .35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .6rem;
+            margin-top: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-submit::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, .1), transparent);
+            transform: translateX(-100%);
+            transition: transform .5s;
+        }
+
+        .btn-submit:hover::after {
+            transform: translateX(100%);
+        }
+
+        .btn-submit:hover {
+            background: #6ba0f9;
+            box-shadow: 0 0 32px rgba(79, 142, 247, .55);
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            opacity: .6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, .3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            display: none;
+        }
+
+        .btn-submit.loading .spinner {
+            display: block;
+        }
+
+        .btn-submit.loading .btn-text {
+            display: none;
+        }
+
+        /* ── PANEL DROIT : MES RÉSERVATIONS ── */
+        .list-panel {
+            padding: 3rem;
+            overflow-y: auto;
+        }
+
+        .list-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: .3rem;
+        }
+
+        .list-subtitle {
+            color: var(--text-muted);
+            font-size: .85rem;
+            margin-bottom: 2rem;
+        }
+
+        /* Loader skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, var(--surface) 25%, var(--surface2) 50%, var(--surface) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 10px;
+            height: 90px;
+            margin-bottom: 1rem;
+        }
+
+        /* Carte de réservation */
+        .reservation-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.2rem 1.4rem;
+            margin-bottom: 1rem;
+            transition: all .25s;
+            position: relative;
+            overflow: hidden;
+            animation: fadeUp .4s ease both;
+        }
+
+        .reservation-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+        }
+
+        .reservation-card.en_attente::before {
+            background: #fbbf24;
+        }
+
+        .reservation-card.confirme::before {
+            background: var(--accent3);
+        }
+
+        .reservation-card.termine::before {
+            background: var(--accent);
+        }
+
+        .reservation-card.annule::before {
+            background: var(--error);
+            opacity: .5;
+        }
+
+        .reservation-card:hover {
+            border-color: rgba(79, 142, 247, .2);
+            transform: translateX(4px);
+        }
+
+        .res-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: .6rem;
+        }
+
+        .res-service {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: .95rem;
+        }
+
+        .res-status {
+            font-size: .72rem;
+            font-weight: 600;
+            padding: .25rem .75rem;
+            border-radius: 100px;
+            text-transform: capitalize;
+        }
+
+        .status-en_attente {
+            background: rgba(251, 191, 36, .15);
+            color: #fbbf24;
+        }
+
+        .status-confirme {
+            background: rgba(52, 211, 153, .15);
+            color: var(--accent3);
+        }
+
+        .status-termine {
+            background: rgba(79, 142, 247, .15);
+            color: var(--accent);
+        }
+
+        .status-annule {
+            background: rgba(248, 113, 113, .12);
+            color: var(--error);
+        }
+
+        .res-details {
+            display: flex;
+            gap: 1.2rem;
+            font-size: .82rem;
+            color: var(--text-muted);
+            margin-bottom: .8rem;
+        }
+
+        .btn-annuler {
+            font-size: .78rem;
+            padding: .35rem .9rem;
+            background: rgba(248, 113, 113, .1);
+            border: 1px solid rgba(248, 113, 113, .25);
+            color: var(--error);
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all .2s;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .btn-annuler:hover {
+            background: rgba(248, 113, 113, .2);
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: .9rem;
+            padding: 3rem 1rem;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+        }
+
+        .empty-msg .empty-icon {
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: .8rem;
+        }
+
+        /* ── SERVICE PREVIEW (sous le select) ── */
+        .service-preview {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1rem 1.2rem;
+            margin-top: .8rem;
+            display: none;
+            gap: 1rem;
+            align-items: center;
+            animation: fadeUp .3s ease both;
+        }
+
+        .service-preview.visible {
+            display: flex;
+        }
+
+        .service-preview-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: rgba(79, 142, 247, .15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .service-preview-info {
+            flex: 1;
+        }
+
+        .service-preview-name {
+            font-weight: 600;
+            font-size: .9rem;
+            margin-bottom: .2rem;
+        }
+
+        .service-preview-prix {
+            font-size: .8rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .service-preview-desc {
+            font-size: .78rem;
+            color: var(--text-muted);
+            margin-top: .2rem;
+        }
+
+        /* ── DIVIDER ── */
+        .section-divider {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin: 2rem 0 1.5rem;
+        }
+
+        .section-divider::before,
+        .section-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .section-divider span {
+            font-size: .78rem;
+            color: var(--text-muted);
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        /* ── ANIMATIONS ── */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float1 {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(40px, 30px);
+            }
+        }
+
+        @keyframes float2 {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(-30px, -20px);
+            }
+        }
+
+        @keyframes pulse-dot {
+
+            0%,
+            100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: .5;
+                transform: scale(.7);
+            }
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes shimmer {
+            0% {
+                background-position: 200% 0;
+            }
+
+            100% {
+                background-position: -200% 0;
+            }
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 900px) {
+            .page-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .form-panel {
+                padding: 2rem;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            .list-panel {
+                padding: 2rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body data-page="reservation">
+
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- NAVBAR -->
+    <nav>
+        <a href="acceuil.html" class="logo">
+            <div class="logo-dot"></div>
+            Servi<span>Pro</span>
+        </a>
+        <div class="nav-right">
+            <a href="acceuil.html" class="nav-link">Accueil</a>
+            <a href="reservation.html" class="nav-link active">Réservation</a>
+            <a href="profil.html" class="nav-link">Mon profil</a>
+            <a href="dashboard.html" class="btn btn-ghost">Dashboard</a>
+        </div>
+    </nav>
+
+    <!-- CONTENU PRINCIPAL -->
+    <div class="page-wrapper">
+
+        <!-- ══ PANEL GAUCHE : FORMULAIRE ══ -->
+        <div class="form-panel">
+            <div class="page-title">📅 Nouvelle réservation</div>
+            <div class="page-subtitle">Choisissez un service et sélectionnez votre créneau</div>
+
+            <!-- Alertes -->
+            <div class="alert alert-error" id="alertError">
+                <span>⚠️</span>
+                <span data-msg>Veuillez remplir tous les champs obligatoires.</span>
+            </div>
+            <div class="alert alert-success" id="alertSuccess">
+                <span>✅</span>
+                <span data-msg>Réservation confirmée ! Un email de confirmation vous a été envoyé.</span>
+            </div>
+
+            <!-- FORMULAIRE (id="reservationForm" attendu par main.js pour le reset) -->
+            <div id="reservationForm">
+
+                <!-- 1. Sélection du service -->
+                <div class="form-group">
+                    <label for="serviceSelect">Service <span class="required">*</span></label>
+                    <div class="select-wrap">
+                        <div class="input-wrap">
+                            <span class="input-icon">🧩</span>
+                            <!-- id="serviceSelect" → utilisé par initReservation() dans main.js -->
+                            <select id="serviceSelect">
+                                <option value="">— Choisir un service —</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Aperçu du service sélectionné (affiché dynamiquement) -->
+                    <div class="service-preview" id="servicePreview">
+                        <div class="service-preview-img" id="previewIcon">🧩</div>
+                        <div class="service-preview-info">
+                            <div class="service-preview-name" id="previewNom">—</div>
+                            <div class="service-preview-prix" id="previewPrix">—</div>
+                            <div class="service-preview-desc" id="previewDesc">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Date et heure -->
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="dateReservation">Date <span class="required">*</span></label>
+                        <div class="input-wrap">
+                            <span class="input-icon">📅</span>
+                            <!-- id="dateReservation" → utilisé par main.js (min = today) -->
+                            <input type="date" id="dateReservation" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="heureReservation">Heure <span class="required">*</span></label>
+                        <div class="input-wrap">
+                            <span class="input-icon">🕐</span>
+                            <!-- id="heureReservation" → utilisé par main.js -->
+                            <input type="time" id="heureReservation" min="08:00" max="18:00" />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. Note facultative -->
+                <div class="form-group">
+                    <label for="noteReservation">Note / message (facultatif)</label>
+                    <!-- id="noteReservation" → utilisé par main.js -->
+                    <textarea id="noteReservation"
+                        placeholder="Ex: Allergie, préférence, informations complémentaires..."></textarea>
+                </div>
+
+                <!-- Bouton soumission -->
+                <!-- id="reserverBtn" → utilisé par main.js -->
+                <button class="btn-submit" id="reserverBtn">
+                    <div class="spinner"></div>
+                    <span class="btn-text">Confirmer la réservation →</span>
+                </button>
+
+            </div>
+            <!-- fin #reservationForm -->
+        </div>
+
+        <!-- ══ PANEL DROIT : MES RÉSERVATIONS ══ -->
+        <div class="list-panel">
+            <div class="list-title">Mes réservations</div>
+            <div class="list-subtitle">Historique et statut de vos demandes</div>
+
+            <!-- Skeletons affichés pendant le chargement -->
+            <div id="loadingSkeletons">
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
+            </div>
+
+            <!-- id="mesReservations" → rempli dynamiquement par initReservation() dans main.js -->
+            <div id="mesReservations"></div>
+        </div>
+
+    </div>
+
+    <script src="js/main.js"></script>
+
+    <script>
+        /* ─────────────────────────────────────────────
+           Script LOCAL réservation.html
+           Complète main.js : aperçu service + skeletons
+        ───────────────────────────────────────────── */
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            /* ── 1. Aperçu dynamique du service sélectionné ── */
+            const serviceSelect = document.getElementById('serviceSelect');
+            const servicePreview = document.getElementById('servicePreview');
+            const previewNom = document.getElementById('previewNom');
+            const previewPrix = document.getElementById('previewPrix');
+            const previewDesc = document.getElementById('previewDesc');
+            const previewIcon = document.getElementById('previewIcon');
+
+            // Cache local des services (chargés par main.js via fetch)
+            // On intercepte après que main.js ait peuplé le <select>
+            serviceSelect.addEventListener('change', () => {
+                const selectedOption = serviceSelect.options[serviceSelect.selectedIndex];
+                if (!selectedOption || !selectedOption.value) {
+                    servicePreview.classList.remove('visible');
+                    return;
+                }
+
+                // On lit les données depuis les data-* si présents (sinon fallback texte)
+                const nom = selectedOption.dataset.nom || selectedOption.textContent.split('—')[0].trim();
+                const prix = selectedOption.dataset.prix || selectedOption.textContent.split('—')[1]?.trim() || '—';
+                const desc = selectedOption.dataset.desc || '';
+                const icon = selectedOption.dataset.icon || '🧩';
+
+                previewNom.textContent = nom;
+                previewPrix.textContent = prix;
+                previewDesc.textContent = desc;
+                previewIcon.textContent = icon;
+                servicePreview.classList.add('visible');
+            });
+
+            /* ── 2. Masquer les skeletons quand main.js a chargé les réservations ── */
+            // On observe les mutations sur #mesReservations
+            const mesRes = document.getElementById('mesReservations');
+            const skeletons = document.getElementById('loadingSkeletons');
+
+            if (mesRes && skeletons) {
+                const observer = new MutationObserver(() => {
+                    if (mesRes.children.length > 0) {
+                        skeletons.style.display = 'none';
+                        observer.disconnect();
+                    }
+                });
+                observer.observe(mesRes, { childList: true });
+
+                // Timeout de sécurité : si rien après 4s, on masque les skeletons
+                setTimeout(() => {
+                    skeletons.style.display = 'none';
+                    if (!mesRes.children.length) {
+                        mesRes.innerHTML = `
+              <div class="empty-msg">
+                <span class="empty-icon">📭</span>
+                Aucune réservation pour le moment.
+              </div>`;
+                    }
+                }, 4000);
+            }
+        });
+    </script>
+
+</body>
+
+</html>
