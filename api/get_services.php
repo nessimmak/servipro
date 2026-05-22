@@ -10,8 +10,7 @@ require_once __DIR__ . '/../classes/Service.php';
 
 $serviceClass = new Service();
 
-// Si admin → tous les services
-// Si utilisateur → seulement les actifs
+// Si admin → tous les services, sinon → seulement les actifs
 if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin') {
     $services = $serviceClass->getAll();
 } else {
