@@ -34,7 +34,7 @@ if ($user) {
 
     echo json_encode([
         'success'  => true,
-        'redirect' => $user['role'] === 'admin' ? 'dashboard.html' : 'acceuil.html',
+        'redirect' => $user['role'] === 'admin' ? 'dashboard.html' : 'profil.html',
         'user'     => [
             'id'     => $user['id'],
             'prenom' => $user['prenom'],
