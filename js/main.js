@@ -993,12 +993,12 @@ function initDashboard() {
     fetch("api/get_stats.php")
       .then((res) => res.json())
       .then((data) => {
-        if (!data) return;
+        if (!data || !data.stats) return;
         const map = {
-          "#statServices": data.services,
-          "#statReservations": data.reservations,
-          "#statClients": data.clients,
-          "#statRevenu": data.revenu + " TND",
+          "#statServices": data.stats.total_services,
+          "#statReservations": data.stats.total_reservations,
+          "#statClients": data.stats.total_clients,
+          "#statRevenu": data.stats.revenu_total + " TND",
         };
         Object.entries(map).forEach(([sel, val]) => {
           const el = $(sel);
