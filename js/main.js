@@ -1054,7 +1054,8 @@ function initDashboard() {
   const addServiceBtn = $("#addServiceBtn");
 
   on(addServiceBtn, "click", () => {
-    if (serviceForm) serviceForm.reset();
+    if (serviceForm && serviceForm.reset) serviceForm.reset();
+    serviceForm.reset();
     if ($("#serviceId")) $("#serviceId").value = "";
     if ($("#modalTitle")) $("#modalTitle").textContent = "Ajouter un service";
     modal?.classList.add("open");
